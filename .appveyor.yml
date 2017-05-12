@@ -1,0 +1,34 @@
+version: 1.0.0.{build}
+
+platform: x64
+
+branches:
+  only:
+    - master
+
+clone_folder: c:\gopath\src\gitlab.com\jbenden\windows
+
+environment:
+  GOPATH: c:\gopath
+
+install:
+  - echo %PATH%
+  - echo %GOPATH%
+  - set PATH=%GOPATH%\bin;c:\go\bin;c:\msys64\mingw64\bin;%PATH%
+  - go version
+  - go env
+  - gcc -V
+  - go get github.com/t-yuki/gocover-cobertura
+  - go get github.com/onsi/gomega
+  - go get github.com/onsi/ginkgo
+  - go get code.google.com/p/go.tools/cmd/cover
+  - go vet
+  - golint
+
+build_script:
+  - go build -o buildOutput\windows.a -buildmode=archive -v -i ./...
+  - go build -o buildOutput\windows.dll -buildmode=shared -v -i ./...
+
+test_script:
+  - go test -o buildOutput\windows.test.exe -coverprofile=coverage_windows.txt -covermode count ./...
+  - %GOPATH%/bin/gocover-cobertura < coverage_windows.txt > coverage_windows.xml
