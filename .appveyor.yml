@@ -17,7 +17,7 @@ install:
   - set PATH=%GOPATH%\bin;c:\go\bin;c:\msys64\mingw64\bin;%PATH%
   - go version
   - go env
-  - gcc -V
+  - gcc -v
   - go get github.com/t-yuki/gocover-cobertura
   - go get github.com/onsi/gomega
   - go get github.com/onsi/ginkgo
