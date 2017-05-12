@@ -31,3 +31,6 @@ build_script:
 test_script:
   - go test -o buildOutput\windows.test.exe -coverprofile=coverage_windows.txt -covermode count ./...
   - "%GOPATH%/bin/gocover-cobertura < coverage_windows.txt > coverage_windows.xml"
+
+artifacts:
+  - path: 'coverage_windows.*'
