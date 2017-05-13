@@ -234,6 +234,7 @@ loopStart:
 // ToString returns a fully-qualified representation of the parsed Path.
 func (p *PathImpl) ToString() string {
 	var unc bytes.Buffer
+	hasComponents := false
 
 	if len(p.device) > 0 {
 		unc.WriteString(p.device)
@@ -244,12 +245,17 @@ func (p *PathImpl) ToString() string {
 		unc.WriteString(p.node)
 	}
 	for _, path := range p.dirs {
+		hasComponents = true
 		unc.WriteString("\\")
 		unc.WriteString(path)
 	}
 	if len(p.name) > 0 {
+		hasComponents = true
 		unc.WriteString("\\")
 		unc.WriteString(p.name)
+	}
+	if !hasComponents {
+		unc.WriteString("\\")
 	}
 
 	return unc.String()
