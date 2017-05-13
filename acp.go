@@ -53,70 +53,76 @@ var ErrInvalidNarrow = errors.New("windows: invalid narrow encoded string")
 var ErrInvalidWide = errors.New("windows: invalid wide-character encoded string")
 
 // GetSystemCodePage returns Window's default system code page.
-func GetSystemCodePage() int {
+func GetSystemCodePage() (cp int) {
 	var cpInfoEx C.CPINFOEX
 
 	if ok := C.GetCPInfoEx(C.CP_ACP, 0, &cpInfoEx); ok == C.TRUE {
-		return (int)(cpInfoEx.CodePage)
+		cp = (int)(cpInfoEx.CodePage)
 	}
 
-	return 0
+	return
 }
 
 // wideToMB converts and wide-character sequence to a multi-byte character sequence.
-func wideToMB(codePage C.UINT, wide []C.wchar_t) (string, error) {
+func wideToMB(codePage C.UINT, wide []C.wchar_t) (s string, e error) {
+	e = ErrInvalidNarrow
+
 	if numOfMB := C.WideCharToMultiByte(codePage, 0 /*C.WC_ERR_INVALID_CHARS*/, (*C.WCHAR)(&wide[0]), -1, nil, 0, nil, nil); numOfMB > 0 {
 		mbStr := make([]C.char, numOfMB)
 		if rc := C.WideCharToMultiByte(codePage, 0 /*C.WC_ERR_INVALID_CHARS*/, (*C.WCHAR)(&wide[0]), -1, (*C.CHAR)(&mbStr[0]), numOfMB, nil, nil); rc > 0 {
 			ptr := (*C.char)(unsafe.Pointer(&mbStr[0])) // #nosec
-			return C.GoString(ptr), nil
+			s, e = C.GoString(ptr), nil
 		}
 	}
 
-	return "", ErrInvalidNarrow
+	return
 }
 
 // mbToWide converts a multi-byte character sequence to wide-character sequence.
-func mbToWide(codePage C.UINT, mb *C.char) ([]C.wchar_t, error) {
+func mbToWide(codePage C.UINT, mb *C.char) (s []C.wchar_t, e error) {
+	e = ErrInvalidWide
+
 	if numOfWC := C.MultiByteToWideChar(codePage, C.MB_ERR_INVALID_CHARS, (*C.CHAR)(mb), -1, nil, 0); numOfWC > 0 {
 		wideStr := make([]C.wchar_t, numOfWC)
 		if rc := C.MultiByteToWideChar(codePage, C.MB_ERR_INVALID_CHARS, (*C.CHAR)(mb), -1, (*C.WCHAR)(&wideStr[0]), numOfWC); rc > 0 {
-			for _, ch := range wideStr {
+			/* for _, ch := range wideStr {
 				if ch == 0xFFFD {
 					return wideStr, ErrInvalidWide
 				}
-			}
-			return wideStr, nil
+			} */
+			s, e = wideStr, nil
 		}
 	}
 
-	return nil, ErrInvalidWide
+	return
 }
 
 // SystemCodePageToUtf8 converts the given string from Window's system code page to an UTF-8 string.
-func SystemCodePageToUtf8(s string) (string, error) {
-	str := C.CString(s)
+func SystemCodePageToUtf8(text string) (s string, e error) {
+	e = ErrInvalidEncoding
+	str := C.CString(text)
 	defer C.free(unsafe.Pointer(str)) // #nosec
 
 	if wcACPStr, err := mbToWide(C.CP_ACP, str); err == nil {
 		if utf8Str, err := wideToMB(C.CP_UTF8, wcACPStr); err == nil {
-			return utf8Str, nil
+			s, e = utf8Str, nil
 		}
 	}
 
-	return s, ErrInvalidEncoding
+	return
 }
 
 // Utf8ToSystemCodePage converts the given UTF-8 string to Window's system code page.
-func Utf8ToSystemCodePage(s string) (string, error) {
-	str := C.CString(s)
+func Utf8ToSystemCodePage(text string) (s string, e error) {
+	e = ErrInvalidEncoding
+	str := C.CString(text)
 	defer C.free(unsafe.Pointer(str)) // #nosec
 
 	if wcACPStr, err := mbToWide(C.CP_UTF8, str); err == nil {
 		if utf8Str, err := wideToMB(C.CP_ACP, wcACPStr); err == nil {
-			return utf8Str, nil
+			s, e = utf8Str, nil
 		}
 	}
 
-	return s, ErrInvalidEncoding
+	return
 }
