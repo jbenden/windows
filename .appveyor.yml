@@ -10,6 +10,8 @@ clone_folder: c:\gopath\src\gitlab.com\jbenden\windows
 
 environment:
   GOPATH: c:\gopath
+  COVERALLS_TOKEN:
+    secure: 9dgYFBooepboCRRrExII83jhQKOUZOxICj/0t4fO+k3RF4U92ZcintWiS6xwMf/O
 
 install:
   - echo %PATH%
@@ -19,6 +21,7 @@ install:
   - go env
   - gcc -v
   - go get github.com/t-yuki/gocover-cobertura
+  - go get github.com/jbenden/goveralls
   - go get github.com/onsi/gomega
   - go get github.com/onsi/ginkgo
   - go get -u github.com/golang/lint/golint
@@ -29,8 +32,9 @@ build_script:
   - go build -o buildOutput\windows.a -buildmode=archive -v -i ./...
 
 test_script:
-  - go test -o buildOutput\windows.test.exe -coverprofile=coverage_windows.txt -covermode count ./...
+  - go test -o buildOutput\windows.test.exe -v -coverprofile=coverage_windows.txt -covermode count ./...
   - "%GOPATH%/bin/gocover-cobertura < coverage_windows.txt > coverage_windows.xml"
+  - "%GOPATH%/bin/goveralls -coverprofile=coverage_windows.txt -service=appveyor"
 
 artifacts:
   - path: 'coverage_windows.*'
