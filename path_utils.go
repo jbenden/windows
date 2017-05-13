@@ -71,16 +71,17 @@ func SystemDirectory() (dir string, e error) {
 
 // HomeDirectory returns the current user's directory on the machine; typically
 // a folder inside the ``C:\Users'' directory.
-func HomeDirectory() (string, error) {
-	if s, ok := os.LookupEnv("USERPROFILE"); ok {
-		return s, nil
-	}
+func HomeDirectory() (dir string, e error) {
+	dir, e = SystemDirectory()
 	if s, ok := os.LookupEnv("HOMEDRIVE"); ok {
 		if s1, ok1 := os.LookupEnv("HOMEPATH"); ok1 {
-			return s + s1, nil
+			dir, e = s+s1, nil
 		}
 	}
-	return SystemDirectory()
+	if s, ok := os.LookupEnv("USERPROFILE"); ok {
+		dir, e = s, nil
+	}
+	return
 }
 
 // ConfigHomeDirectory returns the current user's application configuration
