@@ -504,7 +504,7 @@ var _ = Describe("Path", func() {
 				It("should be the expected value", func() {
 					name, err := windows.SystemDirectory()
 					Expect(err).ShouldNot(HaveOccurred())
-					Expect(name).To(BeIdenticalTo("C:\\Windows\\System32"))
+					Expect(name).To(BeIdenticalTo("C:\\windows\\system32"))
 				})
 			})
 
