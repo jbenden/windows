@@ -494,7 +494,7 @@ var _ = Describe("Path", func() {
 
 	DescribeWhen("running on AppVeyor CI machines",
 		func() bool {
-			if _, ok := os.Getenv("APPVEYOR"); ok {
+			if _, ok := os.LookupEnv("APPVEYOR"); ok {
 				return true
 			}
 			return false
