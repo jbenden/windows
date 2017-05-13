@@ -36,33 +36,37 @@ import (
 //
 // See also MSDN, ``GetComputerName function,''
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms724295(v=vs.85).aspx
-func ComputerName() (string, error) {
+func ComputerName() (name string, e error) {
+	e = errors.New("ComputerName: failed")
 	var numOfWC C.DWORD
+
 	if ok := C.GetComputerNameW(nil, &numOfWC); ok == C.FALSE {
 		wideStr := make([]C.wchar_t, numOfWC+1)
 		if rc := C.GetComputerNameW((*C.WCHAR)(&wideStr[0]), &numOfWC); rc == C.TRUE {
 			if utf8Str, err := wideToMB(C.CP_UTF8, wideStr); err == nil {
-				return utf8Str, nil
+				name, e = utf8Str, nil
 			}
 		}
 	}
 
-	return "", errors.New("ComputerName: failed")
+	return
 }
 
 // SystemDirectory returns the machine's system path location; typically
 // ``C:\WINDOWS\system32''.
-func SystemDirectory() (string, error) {
+func SystemDirectory() (dir string, e error) {
+	e = errors.New("SystemDirectory: failed")
+
 	if numOfWC := C.GetSystemDirectoryW(nil, 0); numOfWC > 0 {
 		wideStr := make([]C.wchar_t, numOfWC)
 		if rc := C.GetSystemDirectoryW((*C.WCHAR)(&wideStr[0]), numOfWC); rc > 0 {
 			if utf8Str, err := wideToMB(C.CP_UTF8, wideStr); err == nil {
-				return utf8Str, nil
+				dir, e = utf8Str, nil
 			}
 		}
 	}
 
-	return "", errors.New("SystemDirectory: failed")
+	return
 }
 
 // HomeDirectory returns the current user's directory on the machine; typically
@@ -83,30 +87,33 @@ func HomeDirectory() (string, error) {
 // directory on the user's roaming profile. All configuration file written
 // are possibly synchronized between multiple machines the user may have
 // access to.
-func ConfigHomeDirectory() (string, error) {
+func ConfigHomeDirectory() (dir string, e error) {
+	dir, e = HomeDirectory()
 	if s, ok := os.LookupEnv("APPDATA"); ok {
-		return s, nil
+		dir, e = s, nil
 	}
-	return HomeDirectory()
+	return
 }
 
 // DataHomeDirectory returns the current user's application data configuration
 // directory on the user's local, specific to the current machine, profile.
 // All configuration data written are only stored on the current machine. For
 // possibly synchronized configuration data, see ConfigHomeDirectory().
-func DataHomeDirectory() (string, error) {
+func DataHomeDirectory() (dir string, e error) {
+	dir, e = ConfigHomeDirectory()
 	if s, ok := os.LookupEnv("LOCALAPPDATA"); ok {
-		return s, nil
+		dir, e = s, nil
 	}
-	return ConfigHomeDirectory()
+	return
 }
 
 // ConfigDirectory returns the running machine's application configuration
 // and/or local data directory. Write access may require Administrator
 // privileges.
-func ConfigDirectory() (string, error) {
+func ConfigDirectory() (dir string, e error) {
+	dir, e = SystemDirectory()
 	if s, ok := os.LookupEnv("PROGRAMDATA"); ok {
-		return s, nil
+		dir, e = s, nil
 	}
-	return SystemDirectory()
+	return
 }
