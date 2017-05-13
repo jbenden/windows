@@ -22,6 +22,8 @@ import (
 
 	"gitlab.com/jbenden/windows"
 
+	"os"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -489,4 +491,101 @@ var _ = Describe("Path", func() {
 
 		},
 	)
+
+	DescribeWhen("running on AppVeyor CI machines",
+		func() bool {
+			if _, ok := os.Getenv("APPVEYOR"); ok {
+				return true
+			}
+			return false
+		},
+		func() {
+			Context("the system directory", func() {
+				It("should be the expected value", func() {
+					name, err := windows.SystemDirectory()
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(name).To(BeIdenticalTo("C:\\Windows\\System32"))
+				})
+			})
+
+			Context("the system configuration directory", func() {
+				It("should be the expected value", func() {
+					name, err := windows.ConfigDirectory()
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(name).To(BeIdenticalTo("C:\\ProgramData"))
+				})
+			})
+
+			Context("the user home directory", func() {
+				It("should be the expected value", func() {
+					name, err := windows.HomeDirectory()
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(name).To(BeIdenticalTo("C:\\Users\\appveyor"))
+				})
+			})
+
+			Context("the user configuration directory", func() {
+				It("should be the expected value", func() {
+					name, err := windows.ConfigHomeDirectory()
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(name).To(BeIdenticalTo("C:\\Users\\appveyor\\AppData\\Roaming"))
+				})
+			})
+
+			Context("the user data configuration directory", func() {
+				It("should be the expected value", func() {
+					name, err := windows.DataHomeDirectory()
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(name).To(BeIdenticalTo("C:\\Users\\appveyor\\AppData\\Local"))
+				})
+			})
+
+			Context("when an absolute path is forced to absolute", func() {
+				BeforeEach(func() {
+					subject = windows.Path("\\msys64").MakeAbsolute()
+				})
+
+				It("should not have a disk/device present", func() {
+					Expect(subject.Device()).Should(BeEmpty())
+				})
+
+				It("should have the correct path", func() {
+					Expect(subject.Name()).Should(Equal("msys64"))
+				})
+
+				It("should be an absolute path", func() {
+					Expect(subject.IsAbsolute()).To(BeTrue())
+				})
+
+				It("should exist in the file system", func() {
+					Expect(subject.ToString()).To(Equal("\\msys64"))
+					Expect(subject.IsDirectoryExists()).To(BeTrue())
+				})
+			})
+
+			Context("when a file is forced to be an absolute path", func() {
+				BeforeEach(func() {
+					subject = windows.Path("path_test.go").MakeAbsolute()
+				})
+
+				It("should have the correct disk/device present", func() {
+					Expect(subject.Device()).Should(Equal("C"))
+				})
+
+				It("should have the correct file name", func() {
+					Expect(subject.Name()).Should(Equal("path_test.go"))
+				})
+
+				It("should be an absolute path", func() {
+					Expect(subject.IsAbsolute()).To(BeTrue())
+				})
+
+				It("should fail a directory exists test", func() {
+					Expect(subject.IsDirectoryExists()).NotTo(BeTrue())
+				})
+			})
+
+		},
+	)
+
 })
