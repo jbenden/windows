@@ -16,10 +16,11 @@ limitations under the License.
 package windows_test
 
 import (
-	"gitlab.com/jbenden/windows"
 	"math/rand"
 	"strings"
 	"time"
+
+	"gitlab.com/jbenden/windows"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
@@ -109,6 +110,7 @@ var _ = Describe("Path", func() {
 			Expect(subject.IsAbsolute()).To(BeFalse())
 			Expect(subject.IsRelative()).To(BeTrue())
 			Expect(subject.ToUnicodeUNC()).To(Equal("\\\\?\\C:\\"))
+			Expect(subject.ToString()).To(Equal("C:\\"))
 		},
 		Entry("a lower-case drive", "c:"),
 		Entry("a upper-case drive", "C:"),
