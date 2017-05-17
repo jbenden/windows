@@ -1,6 +1,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/ab5yrhcq044i9s5a?svg=true)](https://ci.appveyor.com/project/JosephBenden/windows)
 [![Code Climate](https://codeclimate.com/github/jbenden/windows/badges/gpa.svg)](https://codeclimate.com/github/jbenden/windows)
 [![Coverage Status](https://coveralls.io/repos/github/jbenden/windows/badge.svg?branch=HEAD)](https://coveralls.io/github/jbenden/windows?branch=HEAD)
+[![GoDoc](https://godoc.org/github.com/jbenden/windows?status.svg)](https://godoc.org/github.com/jbenden/windows)
 
 windows
 =======
