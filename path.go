@@ -370,11 +370,11 @@ func (p *PathImpl) Errors() []error {
 // semantics.
 //
 // It is able to parse the following types of input:
-//		1. Relative file or directory
-//      2. Absolute file or directory
-//		3. UNC file or directory
-//      4. UNICODE absolute file or directory
-//      5. UNICODE UNC file or directory
+//	1. Relative file or directory
+//	2. Absolute file or directory
+//	3. UNC file or directory
+//	4. UNICODE absolute file or directory
+//	5. UNICODE UNC file or directory
 //
 // Errors are collected during the parsing, for all possible
 // validation errors describe by the referenced MSDN article later
