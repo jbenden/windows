@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// The windows package implements a number of Windows specific features; such as
+// Package windows implements a number of Windows specific features; such as
 // to-and-from system encoding and UTF-8, along with functional APIs for
 // programmatically interacting with paths and files.
 package windows
